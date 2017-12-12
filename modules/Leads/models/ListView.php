@@ -31,8 +31,7 @@ class Leads_ListView_Model extends Vtiger_ListView_Model {
 		}
 
 		$SMSNotifierModuleModel = Vtiger_Module_Model::getInstance('SMSNotifier');
-		//echo $SMSNotifierModuleModel->getId();exit;
-		if($currentUserModel->hasModulePermission($SMSNotifierModuleModel->getId())) {
+		if($SMSNotifierModuleModel && $currentUserModel->hasModulePermission($SMSNotifierModuleModel->getId())) {
 			$massActionLink = array(
 				'linktype' => 'LISTVIEWMASSACTION',
 				'linklabel' => 'LBL_SEND_SMS',
@@ -41,16 +40,23 @@ class Leads_ListView_Model extends Vtiger_ListView_Model {
 			);
 			$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
 		}
-		
-		
+$ICTBroadcastModuleModel = Vtiger_Module_Model::getInstance('ICTBroadcast');
+		if($ICTBroadcastModuleModel && $currentUserModel->hasModulePermission($ICTBroadcastModuleModel->getId())) {
 		$massActionLink = array(
 				'linktype' => 'Start Broadcasting',
 				'linklabel' => 'Start Broadcasting',
-				'linkurl' => 'javascript:Vtiger_List_Js.triggerBroadcaststart("index.php?module='.$this->getModule()->getName().'&view=MassActionAjax&mode=startbroadcasting","IctBroadcasting");',
+				'linkurl' => 'javascript:Vtiger_List_Js.triggerBroad("index.php?module='./*$this->getModule()->getName()*/'ICTBroadcast'.'&view=MassActionAjax&mode=showBroadCasting","ICTBroadcast");',
+				//'linkurl' => 'javascript:Vtiger_List_Js.triggerBroad("index.php?module='.$this->getModule()->getName().'&view=MassActionAjax&mode=showBroadCasting","HelloWorld");',
+
+				//'linkurl' => 'javascript:Leads_List_Js.triggerBroad("index.php?module='./*$this->getModule()->getName()*/'ICTBroadcast'.'&view=MassActionAjax&mode=showBroadCasting","ICTBroadcast");',
+				//'linkurl' => 'javascript:Calendar_List_Js.triggerMassEdit("index.php?module='.'Calendar'.'&view=MassActionAjax&mode=showMassEditForm");',
+
+
 				'linkicon' => ''
 			);
 			$massActionLinks['LISTVIEWMASSACTION'][] = Vtiger_Link_Model::getInstanceFromValues($massActionLink);
 
+}
 		return $massActionLinks;
 	}
 
@@ -73,3 +79,4 @@ class Leads_ListView_Model extends Vtiger_ListView_Model {
 		return $links;
 	}
 }
+

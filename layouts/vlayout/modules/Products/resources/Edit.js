@@ -106,14 +106,11 @@ Vtiger_Edit_Js("Products_Edit_Js",{
 			var parentElem = thisInstance.getCurrentElem(e).closest('tr');
 			var unitPriceFieldData = thisInstance.getUnitPrice().data();
 			var unitPrice = thisInstance.getDataBaseFormatUnitPrice();
-			var groupSeperator = unitPriceFieldData.groupSeperator;
-			var re = new RegExp(groupSeperator, 'g');
-			unitPrice = unitPrice.replace(re, '');
 			var conversionRate = jQuery('.conversionRate',parentElem).val();
 			var price = parseFloat(unitPrice) * parseFloat(conversionRate);
 			var userPreferredDecimalPlaces = unitPriceFieldData.numberOfDecimalPlaces;
 			price = price.toFixed(userPreferredDecimalPlaces);
-			var calculatedPrice = price.toString().replace('.',unitPriceFieldData.decimalSeperator);
+			var calculatedPrice = price.toString().replace('.',unitPriceFieldData.decimalSeparator);
 			jQuery('.convertedPrice',parentElem).val(calculatedPrice);
 		});
 		return this;
@@ -129,8 +126,11 @@ Vtiger_Edit_Js("Products_Edit_Js",{
 				unitPrice = 0;
 			}else{
 				var fieldData = field.data();
-				var strippedValue = unitPrice.replace(fieldData.groupSeperator, '');
-				strippedValue = strippedValue.replace(fieldData.decimalSeperator, '.');
+				//As replace is doing replace of single occurence and using regex 
+				//replace has a problem with meta characters  like (.,$),so using split and join
+				var strippedValue = unitPrice.split(fieldData.groupSeparator);
+				strippedValue = strippedValue.join("");
+				strippedValue = strippedValue.replace(fieldData.decimalSeparator, '.');
 				unitPrice = strippedValue;
 			}
 			return unitPrice;
@@ -171,24 +171,29 @@ Vtiger_Edit_Js("Products_Edit_Js",{
 				var conversionRate = jQuery('.conversionRate',parentRow).val();
 				var unitPriceFieldData = thisInstance.getUnitPrice().data();
 				var unitPrice = thisInstance.getDataBaseFormatUnitPrice();
-				var groupSeperator = unitPriceFieldData.groupSeperator;
-				var re = new RegExp(groupSeperator, 'g');
-				unitPrice = unitPrice.replace(re, '');
 				var price = parseFloat(unitPrice)*parseFloat(conversionRate);
 				jQuery('input',parentRow).attr('disabled', true).removeAttr('disabled');
 				jQuery('button.currencyReset', parentRow).attr('disabled', true).removeAttr('disabled');
 				var userPreferredDecimalPlaces = unitPriceFieldData.numberOfDecimalPlaces;
 				price = price.toFixed(userPreferredDecimalPlaces);
-				var calculatedPrice = price.toString().replace('.',unitPriceFieldData.decimalSeperator);
+				var calculatedPrice = price.toString().replace('.',unitPriceFieldData.decimalSeparator);
 				jQuery('input.convertedPrice',parentRow).val(calculatedPrice)
 			}else{
+				var baseCurrency = jQuery('.baseCurrency', parentRow);
+				if (baseCurrency.is(':checked')) {
+					var currencyName = jQuery('.currencyName', parentRow).text();
+					var params = {
+									'type' : 'error',
+									'title': app.vtranslate('JS_ERROR'),
+									'text' : app.vtranslate('JS_BASE_CURRENCY_CHANGED_TO_DISABLE_CURRENCY') + '"' + currencyName + '"'
+								};
+					Vtiger_Helper_Js.showPnotify(params);
+					elem.prop('checked', true);
+					return;
+				}
 				jQuery('input',parentRow).attr('disabled', true);
 				jQuery('input.enableCurrency',parentRow).removeAttr('disabled');
 				jQuery('button.currencyReset', parentRow).attr('disabled', 'disabled');
-				var baseCurrency = jQuery('.baseCurrency', parentRow);
-				if(baseCurrency.is(':checked')){
-					baseCurrency.removeAttr('checked');
-				}
 			}
 		})
 		return this;
@@ -259,14 +264,22 @@ Vtiger_Edit_Js("Products_Edit_Js",{
 						var multiCurrencyEditUI = jQuery('.multiCurrencyEditUI');
 						thisInstance.multiCurrencyContainer = multiCurrencyEditUI;
                         thisInstance.calculateConversionRate();
-						thisInstance.registerEventForEnableCurrency().registerEventForEnableBaseCurrency()
-											.registerEventForResetCurrency().triggerForBaseCurrencyCalc();
+						thisInstance.registerEventForEnableCurrency();
+						thisInstance.registerEventForEnableBaseCurrency();
+						thisInstance.registerEventForResetCurrency();
+						thisInstance.triggerForBaseCurrencyCalc();
 					}
+                    var moreCurrenciesContainer = jQuery('#moreCurrenciesContainer').find('.multiCurrencyEditUI');
 					var contentInsideForm = moreCurrenciesUi.find('.multiCurrencyContainer').html();
 					moreCurrenciesUi.find('.multiCurrencyContainer').remove();
 					var form = '<form id="currencyContainer"></form>'
 					jQuery(form).insertAfter(moreCurrenciesUi.find('.modal-header'));
 					moreCurrenciesUi.find('form').html(contentInsideForm);
+                    moreCurrenciesContainer.find('input[name^=curname]').each(function(index,element){
+                    	var dataValue = jQuery(element).val();
+                        var dataId = jQuery(element).attr('id');
+                        moreCurrenciesUi.find('#'+dataId).val(dataValue);
+                    });
 
 					var modalWindowParams = {
 						data : moreCurrenciesUi,
@@ -288,9 +301,11 @@ Vtiger_Edit_Js("Products_Edit_Js",{
 		jQuery.each(baseCurrency,function(key,val){
 			if(jQuery(val).is(':checked')){
 				var baseCurrencyRow = jQuery(val).closest('tr');
-				baseCurrencyRow.find('.currencyReset').trigger('click');
-			}else{
-                var baseCurrencyRow = jQuery(val).closest('tr');
+                if(parseFloat(baseCurrencyRow.find('.convertedPrice').val()) == 0) {
+                	baseCurrencyRow.find('.currencyReset').trigger('click');
+                }
+			} else {
+				var baseCurrencyRow = jQuery(val).closest('tr');
                 baseCurrencyRow.find('.convertedPrice').val('');
             }
 		})
@@ -320,6 +335,7 @@ Vtiger_Edit_Js("Products_Edit_Js",{
 				e.preventDefault();
 				thisInstance.getMoreCurrenciesUI().then(function(data){
 					thisInstance.preSaveConfigOfForm(form);
+					InitialFormData = form.serialize();
 					form.submit();
 				})
 			}else if(multiCurrencyContent.length > 0){
@@ -384,6 +400,11 @@ Vtiger_Edit_Js("Products_Edit_Js",{
 		var savedValuesOfMultiCurrency = modalContainer.find('.currencyContent').html();
 		var moreCurrenciesContainer = jQuery('#moreCurrenciesContainer');
 		moreCurrenciesContainer.find('.currencyContent').html(savedValuesOfMultiCurrency);
+        modalContainer.find('input[name^=curname]').each(function(index,element){
+        	var dataValue = jQuery(element).val();
+            var dataId = jQuery(element).attr('id');
+            moreCurrenciesContainer.find('.currencyContent').find('#'+dataId).val(dataValue);
+        });
 		app.hideModalWindow();
 	},
 	

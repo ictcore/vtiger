@@ -28,7 +28,7 @@
 					<i class="icon-pencil alignMiddle" title="{vtranslate('LBL_EDIT', $QUALIFIED_MODULE)}"></i>
 				</a>
 				<div class="basicFieldOperations pull-right hide" style="width : 250px;">
-					<form class="form-horizontal fieldDetailsForm">
+					<form class="form-horizontal fieldDetailsForm" method="POST">
 						<div class="modal-header"><strong>{vtranslate($FIELD_MODEL->get('label'), $SELECTED_MODULE_NAME)}</strong></div>
 						<div class="contentsBackground" style="padding-bottom: 5px;">
 						<span><label class="checkbox" style="padding-left: 25px; padding-top: 5px;"><input type="hidden" name="mandatory" value="O" />
@@ -105,7 +105,7 @@
 											<span class="add-on">{$USER_MODEL->get('currency_symbol')}</span>
 											<input type="text" class="input-medium" name="fieldDefaultValue" {if !$FIELD_MODEL->hasDefaultValue()} disabled="" {/if} data-validation-engine="validate[required,funcCall[Vtiger_Base_Validator_Js.invokeValidation]]" 
 												data-fieldinfo='{ZEND_JSON::encode($FIELD_INFO)}' value="{$FIELD_MODEL->getEditViewDisplayValue($FIELD_MODEL->get('defaultvalue'))}" 
-												data-decimal-seperator='{$USER_MODEL->get('currency_decimal_separator')}' data-group-seperator='{$USER_MODEL->get('currency_grouping_separator')}' />
+												data-decimal-separator='{$USER_MODEL->get('currency_decimal_separator')}' data-group-separator='{$USER_MODEL->get('currency_grouping_separator')}' />
 										</div>
 									{else}
 										<input type="text" {if !$FIELD_MODEL->hasDefaultValue()} disabled="" {/if} data-validation-engine="validate[required,funcCall[Vtiger_Base_Validator_Js.invokeValidation]]" class="input-medium" name="fieldDefaultValue" value="{$FIELD_MODEL->get('defaultvalue')}" data-fieldinfo='{ZEND_JSON::encode($FIELD_INFO)}'/>

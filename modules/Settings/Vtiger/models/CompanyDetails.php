@@ -19,17 +19,36 @@ class Settings_Vtiger_CompanyDetails_Model extends Settings_Vtiger_Module_Model 
 	var $logoPath = 'test/logo/';
 
 	var $fields = array(
-			'organizationname' => 'text',
-			'logoname' => 'text',
-			'logo' => 'file',
-			'address' => 'textarea',
-			'city' => 'text',
-			'state' => 'text',
-			'code'  => 'text',
-			'country' => 'text',
-			'phone' => 'text',
-			'fax' => 'text',
-			'website' => 'text'
+		'organizationname' => 'text',
+		'logoname' => 'text',
+		'logo' => 'file',
+		'address' => 'textarea',
+		'city' => 'text',
+		'state' => 'text',
+		'code'  => 'text',
+		'country' => 'text',
+		'phone' => 'text',
+		'fax' => 'text',
+		'website' => 'text',
+		'vatid' => 'text' 
+	);
+
+	var $companyBasicFields = array(
+		'organizationname' => 'text',
+		'logoname' => 'text',
+		'logo' => 'file',
+		'address' => 'textarea',
+		'city' => 'text',
+		'state' => 'text',
+		'code'  => 'text',
+		'country' => 'text',
+		'phone' => 'text',
+		'fax' => 'text',
+		'vatid' => 'text'
+	);
+
+	var $companySocialLinks = array(
+		'website' => 'text',
 	);
 
 	/**
@@ -39,7 +58,7 @@ class Settings_Vtiger_CompanyDetails_Model extends Settings_Vtiger_Module_Model 
 	public function getEditViewUrl() {
 		return 'index.php?module=Vtiger&parent=Settings&view=CompanyDetailsEdit';
 	}
-	
+
 	/**
 	 * Function to get CompanyDetails Menu item
 	 * @return menu item Model
@@ -48,7 +67,7 @@ class Settings_Vtiger_CompanyDetails_Model extends Settings_Vtiger_Module_Model 
 		$menuItem = Settings_Vtiger_MenuItem_Model::getInstance('LBL_COMPANY_DETAILS');
 		return $menuItem;
 	}
-	
+
 	/**
 	 * Function to get Index view Url
 	 * @return <String> URL
@@ -73,7 +92,7 @@ class Settings_Vtiger_CompanyDetails_Model extends Settings_Vtiger_Module_Model 
 	public function getLogoPath() {
 		$logoPath = $this->logoPath;
 		$handler = @opendir($logoPath);
-		$logoName = $this->get('logoname');
+		$logoName = decode_html($this->get('logoname'));
 		if ($logoName && $handler) {
 			while ($file = readdir($handler)) {
 				if($logoName === $file && in_array(str_replace('.', '', strtolower(substr($file, -4))), self::$logoSupportedFormats) && $file != "." && $file!= "..") {
@@ -128,6 +147,17 @@ class Settings_Vtiger_CompanyDetails_Model extends Settings_Vtiger_Module_Model 
 			array_push($params, $db->getUniqueID($this->baseTable));
 		}
 		$db->pquery($query, $params);
+
+		$companyName = $this->get('organizationname');
+		$companyName = preg_replace(array("/>/", "/</", "/&/", "/'/", '/""/', '/gt;/', '/lt;/', '/;/'), '', $companyName);
+		$fileContent = file_get_contents('portal/config.inc.php');
+		$pattern = '/\$companyName[\s]+=([^;]+);/';
+		$replacedValue = sprintf("\$%s = '%s';", 'companyName', $companyName);
+		$fileContent = preg_replace($pattern, $replacedValue, $fileContent);
+		$fp = fopen('portal/config.inc.php', 'w');
+		fwrite($fp, $fileContent);
+		fclose($fp);
+		// End
 	}
 
 	/**

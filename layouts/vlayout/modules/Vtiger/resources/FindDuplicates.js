@@ -10,6 +10,9 @@ Vtiger_List_Js('Vtiger_FindDuplicates_Js',{
 
 	massDeleteRecords : function(url) {
 		var listInstance = new Vtiger_FindDuplicates_Js();
+        var fields = jQuery('#duplicateSearchFields').val();
+        var ignoreEmpty = jQuery('#ignoreEmpty').val();
+        url += '&mode=FindDuplicates&fields=' + fields + '&ignoreEmpty=' + ignoreEmpty;
 		Vtiger_List_Js.massDeleteRecords(url,listInstance);
 	}
 },{
@@ -32,6 +35,8 @@ Vtiger_List_Js('Vtiger_FindDuplicates_Js',{
 				jQuery('#listViewContents').html(data);
 				jQuery('#recordsCount').val('');
 				jQuery('#totalPageCount').text('');
+                var selectedIds = new Array();
+                thisInstance.writeSelectedIds(selectedIds);
 				thisInstance.calculatePages().then(function(){
 					thisInstance.updatePagination();
 				});
@@ -235,7 +240,6 @@ Vtiger_List_Js('Vtiger_FindDuplicates_Js',{
 		thisInstance.registerSelectAllClickEvent();
 		thisInstance.registerDeselectAllClickEvent();
 		thisInstance.registerEventForTotalRecordsCount();
-		jQuery('.pageNumbers').tooltip();
 	},
 
 	/**

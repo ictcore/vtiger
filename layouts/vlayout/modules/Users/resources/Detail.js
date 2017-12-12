@@ -70,7 +70,7 @@ Vtiger_Detail_Js("Users_Detail_Js",{
 	 * @params: delete record url.
 	 */
     triggerDeleteUser : function(deleteUserUrl) {
-		var message = app.vtranslate('LBL_DELETE_CONFIRMATION');
+		var message = app.vtranslate('LBL_DELETE_USER_CONFIRMATION');
 		Vtiger_Helper_Js.showConfirmationBox({'message' : message}).then(function(data) {
 				AppConnector.request(deleteUserUrl).then(
 				function(data){
@@ -113,7 +113,7 @@ Vtiger_Detail_Js("Users_Detail_Js",{
 			function(data) {
 				if(data.success){
 					app.hideModalWindow();
-					Vtiger_Helper_Js.showPnotify(app.vtranslate(data.result.message));
+					Vtiger_Helper_Js.showPnotify(app.vtranslate(data.result.status.message));
 					var url = data.result.listViewUrl;
 					window.location.href=url;
 				}
@@ -171,7 +171,31 @@ Vtiger_Detail_Js("Users_Detail_Js",{
 				}
 			}
 		);
-	}
+	},
+
+	triggerChangeAccessKey: function (url) {
+		var title = app.vtranslate('JS_NEW_ACCESS_KEY_REQUESTED');
+		var message = app.vtranslate('JS_CHANGE_ACCESS_KEY_CONFIRMATION');
+		Vtiger_Helper_Js.showConfirmationBox({'title': title,'message': message}).then(function (data) {
+			AppConnector.request(url).then(function(data) {
+				var params = {};
+				if(data['success']) {
+					data = data.result;
+					params['type'] = 'success';
+					message = app.vtranslate(data.message);
+					var accessKeyEle = jQuery('#Users_detailView_fieldValue_accesskey');
+					if (accessKeyEle.length) {
+						accessKeyEle.find('.value').html(data.accessKey);
+					}
+				} else {
+					message = app.vtranslate(data['error']['message']);
+				}
+				params['text'] = message;
+				Vtiger_Helper_Js.showPnotify(params);
+			});
+		});
+	},
+
 },{
 	
 	usersEditInstance : false,

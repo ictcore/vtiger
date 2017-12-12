@@ -27,4 +27,50 @@ class Products_RelationListView_Model extends Vtiger_RelationListView_Model {
 			return parent::getLinks();
 		}
 	}
+	
+	public function getHeaders() {
+		$headerFields = parent::getHeaders();
+		if($this->getRelationModel()->getRelationModuleModel()->getName() == 'PriceBooks') {
+			//Added to support Unit Price
+			$unitPriceField = new Vtiger_Field_Model();
+			$unitPriceField->set('name', 'unit_price');
+			$unitPriceField->set('column', 'unit_price');
+			$unitPriceField->set('label', 'Unit Price');
+			
+			$headerFields['unit_price'] = $unitPriceField;
+			
+			//Added to support List Price
+			$field = new Vtiger_Field_Model();
+			$field->set('name', 'listprice');
+			$field->set('column', 'listprice');
+			$field->set('label', 'List Price');
+			
+			$headerFields['listprice'] = $field;
+		}
+		
+		return $headerFields;
+	}
+	
+	public function getRelationQuery() {
+		$query = parent::getRelationQuery();
+
+		$relationModel = $this->getRelationModel();
+		$parentModule = $relationModel->getParentModuleModel();
+		$parentModuleName = $parentModule->getName();
+		$relatedModuleName = $this->getRelatedModuleModel()->getName();
+		$quantityField = $parentModule->getField('qty_per_unit');
+
+		if ($parentModuleName === $relatedModuleName && $this->tab_label === 'Product Bundles' && $quantityField->isActiveField()) {//Products && Child Products
+			$queryComponents = spliti(' FROM ', $query);
+			$count = count($queryComponents);
+
+			$query = $queryComponents[0]. ', vtiger_seproductsrel.quantity AS qty_per_unit ';
+			for($i=1; $i<$count; $i++) {
+				$query .= ' FROM '.$queryComponents[$i];
+			}
+		}
+
+		return $query;
+	}
+
 }

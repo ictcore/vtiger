@@ -32,7 +32,6 @@ class Vtiger_TooltipView_Model extends Vtiger_DetailRecordStructure_Model {
 	 * Function to get list of tooltip enabled field model.
 	 * @return <Vtiger_Field_Model>
 	 */
-
 	public function getFields() {
 		return $this->fields;
 	}
@@ -50,6 +49,9 @@ class Vtiger_TooltipView_Model extends Vtiger_DetailRecordStructure_Model {
 		foreach ($this->fields as $fieldModel) {
 			$fieldType = $fieldModel->getFieldDataType();
 			$fieldName = $fieldModel->get('name');
+            if($moduleName == 'Documents' && $fieldName == 'filename') {
+                continue;
+            }
 			
 			$fieldNames[] = $fieldName;
 			if ($fieldType == 'reference' || $fieldType == 'owner') {
@@ -62,6 +64,7 @@ class Vtiger_TooltipView_Model extends Vtiger_DetailRecordStructure_Model {
 		// Retrieves only required fields of the record with permission check.
 		try {
 			$data = array_shift(vtws_query($q, Users_Record_Model::getCurrentUserModel()));
+
 			if ($data) {
 				// De-transform the webservice ID to CRM ID.
 				foreach ($data as $key => $value) {
@@ -90,11 +93,16 @@ class Vtiger_TooltipView_Model extends Vtiger_DetailRecordStructure_Model {
 			$tooltipFieldsList = $this->fields;
 			$recordModel = $this->getRecord();
 			$this->structuredValues = array('TOOLTIP_FIELDS' => array());
+            $moduleName = $this->module->getName();
 			if ($tooltipFieldsList) {
 				foreach ($tooltipFieldsList as $fieldModel) {
 					$fieldName = $fieldModel->get('name');
+                    if($moduleName == 'Documents' && $fieldName == 'filename') {
+                        continue;
+                    }
 					if($fieldModel->isViewableInDetailView()) {
-						$fieldModel->set('fieldvalue', $recordModel->get($fieldName));
+                        // tosafeHTML is to avoid XSS Vulnerability
+						$fieldModel->set('fieldvalue', Vtiger_Util_Helper::toSafeHTML($recordModel->get($fieldName)));
 						$this->structuredValues['TOOLTIP_FIELDS'][$fieldName] = $fieldModel;
 					}
 				}
@@ -111,6 +119,13 @@ class Vtiger_TooltipView_Model extends Vtiger_DetailRecordStructure_Model {
 	 * @return <Vtiger_DetailView_Model>
 	 */
 	public static function getInstance($moduleName,$recordId) {
+       if($moduleName=="Calendar"){
+            $recordModel = Vtiger_Record_Model::getInstanceById($recordId);
+			$activityType = $recordModel->getType();
+            if($activityType=="Events"){
+                $moduleName="Events";
+            }
+        }
 		$modelClassName = Vtiger_Loader::getComponentClassName('Model', 'TooltipView', $moduleName);
 		$instance = new $modelClassName();
 

@@ -65,6 +65,9 @@ class DateTimeField {
 		return $this->getDisplayDate($user) . ' ' . $this->getDisplayTime($user);
 	}
 
+    public function getFullcalenderDateTimevalue ($user = null) {
+		return $this->getDisplayDate($user) . ' ' . $this->getFullcalenderTime($user);
+	}
 	/**
 	 *
 	 * @global Users $current_user
@@ -266,6 +269,15 @@ class DateTimeField {
 		$time = $date->format("H:i:s");
 		$log->debug("Exiting getDisplayTime method ...");
 		return $time;
+	}
+    
+     function getFullcalenderTime( $user = null ) {
+		global $log;
+		$log->debug("Entering getDisplayTime(" . $this->datetime . ") method ...");
+		$date = self::convertToUserTimeZone($this->datetime, $user);
+		$time = $date->format("H:i:s");
+		$log->debug("Exiting getDisplayTime method ...");
+        return $time;
 	}
 
 	static function getDBTimeZone() {

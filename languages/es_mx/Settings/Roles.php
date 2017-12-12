@@ -18,10 +18,20 @@ $languageStrings = array(
 	'LBL_ASSIGN_ROLE'              => 'Assign Role'                 , // TODO: Review
 	'LBL_CHOOSE_PROFILES'          => 'Choose profiles'             , // TODO: Review
 	'LBL_COPY_PRIVILEGES_FROM'     => 'Copy privileges from'        , // TODO: Review
+    'LBL_TRANSFER_TO_OTHER_ROLE' =>'Transferir la propiedad a otra función',
 	'LBL_PROFILE'                  => 'Profile'                     , // TODO: Review
 	'LBL_REPORTS_TO'               => 'Reports To'                  , // TODO: Review
 	'LBL_NAME'                     => 'Name'                        , // TODO: Review
 	'LBL_ASSIGN_NEW_PRIVILEGES'    => 'Assign privileges directly to Role', // TODO: Review
 	'LBL_ASSIGN_EXISTING_PRIVILEGES' => 'Assign priviliges from existing profiles', // TODO: Review
 	'LBL_PRIVILEGES'               => 'Privileges'                  , // TODO: Review
+
+  'LBL_DUPLICATES_EXIST' => 'Función Duplicada Existe',
+  'LBL_CAN_ASSIGN_RECORDS_TO' => 'Puede Asignar Registros A',
+  'LBL_ALL_USERS' => 'Todos Los Usuarios',
+  'LBL_USERS_WITH_LOWER_LEVEL' => 'Usuarios que tienen el Rol Subordinado',
+  'LBL_USERS_WITH_SAME_OR_LOWER_LEVEL' => 'Usuarios que tienen el Mismo Rol o Papel Subordinado',
+  'LBL_EDIT_ROLE' => 'Edición Papel',
+  'LBL_CREATE_ROLE' => 'Crear Papel',
+
 );

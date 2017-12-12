@@ -24,6 +24,7 @@ require_once('include/utils/utils.php'); //new
 require_once('include/utils/RecurringType.php');
 require_once('include/utils/EmailTemplate.php');
 require_once 'include/QueryGenerator/QueryGenerator.php';
+require_once 'include/QueryGenerator/EnhancedQueryGenerator.php';
 require_once 'include/ListView/ListViewController.php';
 require_once 'includes/runtime/Cache.php';
 
@@ -57,7 +58,7 @@ function getCurrencyName($currencyid, $show_symbol = true) {
 
 function getTabid($module) {
 	return Vtiger_Functions::getModuleId($module);
-}
+	}
 
 function getFieldid($tabid, $fieldname, $onlyactive = true) {
 	return Vtiger_Functions::getModuleFieldId($tabid, $fieldname, $onlyactive);
@@ -129,7 +130,7 @@ function getUserFullName($userid) {
 
 function getParentName($parent_id) {
 	return Vtiger_Functions::getCRMRecordLabel($parent_id);
-}
+	}
 
 function getValidDisplayDate($cur_date_val) {
 	return Vtiger_Functions::currentUserDisplayDate($cur_date_val);
@@ -150,8 +151,8 @@ function getCurrencySymbolandCRate($id) {
 /** This function returns the terms and condition from the database.
  * Takes no param and the return type is text.
  */
-function getTermsandConditions() {
-	return Vtiger_Functions::getInventoryTermsAndCondition();
+function getTermsAndConditions($moduleName) {
+	return Vtiger_Functions::getInventoryTermsAndCondition($moduleName);
 }
 
 /** This function returns a string with removed new line character, single quote, and back slash double quoute.
@@ -209,7 +210,7 @@ function create_parenttab_data_file() {
 	return Vtiger_Deprecated::createModuleGroupMetaFile();
 }
 
-function getEntityName($module, $ids_list, $compute=false) {
+function getEntityName($module, $ids_list, $compute=true) {
 	if ($compute) {
 		return Vtiger_Functions::computeCRMRecordLabels($module, $ids_list);
 	} else {
@@ -250,8 +251,8 @@ function getTemplateDetails($templateid) {
  *  @param string $parent_type - module of the entity
  * 	return string $description - Returns description, merged with the input template.
  */
-function getMergedDescription($description, $id, $parent_type) {
-	return Vtiger_Functions::getMergedDescription($description, $id, $parent_type);
+function getMergedDescription($description, $id, $parent_type, $removeTags = false) {
+	return Vtiger_Functions::getMergedDescription($description, $id, $parent_type, $removeTags);
 }
 
 /** 	Function used to retrieve a single field value from database
@@ -281,8 +282,8 @@ function getrecurringObjValue() {
 	return Vtiger_Functions::getRecurringObjValue();
 }
 
-function getTranslatedString($str, $module = 'Vtiger') {
-	return Vtiger_Functions::getTranslatedString($str, $module);
+function getTranslatedString($str, $module = 'Vtiger', $language = '') {
+	return Vtiger_Functions::getTranslatedString($str, $module, $language);
 }
 
 /**
@@ -292,7 +293,7 @@ function getTranslatedString($str, $module = 'Vtiger') {
  */
 function getTranslatedCurrencyString($str) {
 	return Vtiger_Deprecated::getTranslatedCurrencyString($str);
-}
+	}
 
 function getTicketComments($ticketid) {
 	return Vtiger_Functions::getTicketComments($ticketid);
@@ -483,7 +484,7 @@ function getSqlForNameInDisplayFormat($input, $module, $glue = ' ') {
 
 function getModuleSequenceNumber($module, $recordId) {
 	return Vtiger_Deprecated::getModuleSequenceNumber($module, $recordId);
-}
+	}
 
 function getInvoiceStatus($invoiceId) {
 	return Vtiger_Functions::getInvoiceStatus($invoiceId);
@@ -495,6 +496,10 @@ function decimalFormat($value){
 
 function updateRecordLabel($module,$recordId){
 	return Vtiger_Functions::updateCRMRecordLabel($module, $recordId);
+}
+
+function get_group_options() {
+    return Vtiger_Functions::get_group_options();
 }
 
 ?>

@@ -50,7 +50,7 @@ class Accounts_DetailView_Model extends Vtiger_DetailView_Model {
 		
 		$CalendarActionLinks = array();
 		$CalendarModuleModel = Vtiger_Module_Model::getInstance('Calendar');
-		if($currentUserModel->hasModuleActionPermission($CalendarModuleModel->getId(), 'EditView')) {
+		if($currentUserModel->hasModuleActionPermission($CalendarModuleModel->getId(), 'CreateView')) {
 			$CalendarActionLinks[] = array(
 					'linktype' => 'DETAILVIEW',
 					'linklabel' => 'LBL_ADD_EVENT',
@@ -67,7 +67,7 @@ class Accounts_DetailView_Model extends Vtiger_DetailView_Model {
 		}
 
 		$SMSNotifierModuleModel = Vtiger_Module_Model::getInstance('SMSNotifier');
-		if($currentUserModel->hasModulePermission($SMSNotifierModuleModel->getId())) {
+		if(!empty($SMSNotifierModuleModel) && $currentUserModel->hasModulePermission($SMSNotifierModuleModel->getId())) {
 			$basicActionLink = array(
 				'linktype' => 'DETAILVIEWBASIC',
 				'linklabel' => 'LBL_SEND_SMS',

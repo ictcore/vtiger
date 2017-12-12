@@ -116,6 +116,8 @@ class HelloWorld_MassSaveAjax_Action extends Vtiger_Mass_Action {
 		if(!empty($toNumbers)) {
 		
 			$response->setResult($json_data);
+			
+				$response->setResult(array('statusdetails' => $json_data));
 		} else {
 			$response->setResult($json_data);
 		}

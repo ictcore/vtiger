@@ -11,7 +11,7 @@
 				importid INT NOT NULL,
 				locked_since DATETIME)
 			ENGINE=InnoDB DEFAULT CHARSET=utf8
-		]]></sql>
+			]]></sql>
 		</table>
 		<table>
 			<name>vtiger_import_queue</name>
@@ -26,7 +26,7 @@
 				merge_fields TEXT,
 				status INT default 0)
 			ENGINE=InnoDB DEFAULT CHARSET=utf8
-		]]></sql>
+			]]></sql>
 		</table>
 	</tables>
 </schema>

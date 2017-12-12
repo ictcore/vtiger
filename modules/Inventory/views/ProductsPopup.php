@@ -27,7 +27,7 @@ class Inventory_ProductsPopup_View extends Vtiger_Popup_View {
 
 		$viewer->assign('COMPANY_LOGO',$companyLogo);
 		$moduleName = 'Inventory';
-		$viewer->assign('MODULE_NAME',$moduleName);
+		$viewer->assign('MODULE_NAME', $moduleName);
 		$viewer->view('Popup.tpl', $moduleName);
 	}
 
@@ -49,7 +49,7 @@ class Inventory_ProductsPopup_View extends Vtiger_Popup_View {
 		$searchKey = $request->get('search_key');
 		$searchValue = $request->get('search_value');
 		$currencyId = $request->get('currency_id');
-
+		$searchParams=$request->get('search_params');
 		//To handle special operation when selecting record from Popup
 		$getUrl = $request->get('get_url');
 
@@ -87,11 +87,19 @@ class Inventory_ProductsPopup_View extends Vtiger_Popup_View {
 			$listViewModel->set('search_value', $searchValue);
 		}
 
+		if(!empty($searchParams)) {
+			$transformedSearchParams = $this->transferListSearchParamsToFilterCondition($searchParams, $listViewModel->getModule());
+			$listViewModel->set('search_params',$transformedSearchParams);
+		}
 		if(!$this->listViewHeaders) {
 			$this->listViewHeaders = $listViewModel->getListViewHeaders();
 		}
-		if(!$this->listViewEntries) {
+
+		if(!$this->listViewEntries && $moduleModel->isActive()) {
 			$this->listViewEntries = $listViewModel->getListViewEntries($pagingModel);
+		}else{
+			$this->listViewEntries = array(); 
+			$viewer->assign('IS_MODULE_DISABLED', true);
 		}
 
 		foreach ($this->listViewEntries as $key => $listViewEntry) {
@@ -109,13 +117,35 @@ class Inventory_ProductsPopup_View extends Vtiger_Popup_View {
 		}
 		if($sortOrder == "ASC") {
 			$nextSortOrder = "DESC";
-			$sortImage = "downArrowSmall.png";
-		}else {
+			$sortImage = "icon-chevron-down";
+			$faSortImage = "fa-sort-desc";
+		} else {
 			$nextSortOrder = "ASC";
-			$sortImage = "upArrowSmall.png";
+			$sortImage = "icon-chevron-up";
+			$faSortImage = "fa-sort-asc";
 		}
-		$viewer->assign('MODULE', $moduleName);
+		if(empty($searchParams)) {
+			$searchParams = array();
+		}
+		//To make smarty to get the details easily accesible
+		foreach($searchParams as $fieldListGroup){
+			foreach($fieldListGroup as $fieldSearchInfo){
+				$fieldSearchInfo['searchValue'] = $fieldSearchInfo[2];
+				$fieldSearchInfo['fieldName'] = $fieldName = $fieldSearchInfo[0];
+				$fieldSearchInfo['comparator'] = $fieldSearchInfo[1];
+				$searchParams[$fieldName] = $fieldSearchInfo;
+			}
+		}
 
+		$fieldList = $moduleModel->getFields();
+		$fieldsInfo = array();
+		foreach($fieldList as $name => $model){
+			$fieldsInfo[$name] = $model->getFieldInfo();
+		}
+
+		$viewer->assign('FIELDS_INFO', json_encode($fieldsInfo));
+		$viewer->assign('MODULE', $moduleName);
+		$viewer->assign('RELATED_MODULE', $moduleName); 
 		$viewer->assign('SOURCE_MODULE', $sourceModule);
 		$viewer->assign('SOURCE_FIELD', $sourceField);
 		$viewer->assign('SOURCE_RECORD', $sourceRecord);
@@ -127,6 +157,7 @@ class Inventory_ProductsPopup_View extends Vtiger_Popup_View {
 		$viewer->assign('SORT_ORDER',$sortOrder);
 		$viewer->assign('NEXT_SORT_ORDER',$nextSortOrder);
 		$viewer->assign('SORT_IMAGE',$sortImage);
+		$viewer->assign('FASORT_IMAGE',$faSortImage);
 		$viewer->assign('GETURL', $getUrl);
 		$viewer->assign('CURRENCY_ID', $currencyId);
 
@@ -136,9 +167,10 @@ class Inventory_ProductsPopup_View extends Vtiger_Popup_View {
 		$viewer->assign('PAGING_MODEL', $pagingModel);
 		$viewer->assign('PAGE_NUMBER',$pageNumber);
 
-		$viewer->assign('LISTVIEW_ENTIRES_COUNT',$noOfEntries);
+		$viewer->assign('LISTVIEW_ENTRIES_COUNT',$noOfEntries);
 		$viewer->assign('LISTVIEW_HEADERS', $this->listViewHeaders);
 		$viewer->assign('LISTVIEW_ENTRIES', $this->listViewEntries);
+		$viewer->assign('SEARCH_DETAILS', $searchParams);
 		
 		if (PerformancePrefs::getBoolean('LISTVIEW_COMPUTE_PAGE_COUNT', false)) {
 			if(!$this->listViewCount){
@@ -154,11 +186,10 @@ class Inventory_ProductsPopup_View extends Vtiger_Popup_View {
 			$viewer->assign('PAGE_COUNT', $pageCount);
 			$viewer->assign('LISTVIEW_COUNT', $totalCount);
 		}
-
+		$viewer->assign('MODULE_MODEL', $moduleModel);
 		$viewer->assign('MULTI_SELECT', $multiSelectMode);
 		$viewer->assign('CURRENT_USER_MODEL', Users_Record_Model::getCurrentUserModel());
-
-		$viewer->assign('MODULE', $request->getModule());
+		$viewer->assign('TARGET_MODULE', $moduleName);
 		$viewer->assign('GETURL', 'getTaxesURL');
 		$viewer->assign('VIEW', 'ProductsPopup');
 	}
@@ -181,6 +212,10 @@ class Inventory_ProductsPopup_View extends Vtiger_Popup_View {
 		$headerScriptInstances = array_merge($headerScriptInstances, $jsScriptInstances);
 
 		return $headerScriptInstances;
+	}
+
+	public function transferListSearchParamsToFilterCondition($listSearchParams, $moduleModel) {
+		return Vtiger_Util_Helper::transferListSearchParamsToFilterCondition($listSearchParams, $moduleModel);
 	}
 
 }

@@ -19,7 +19,7 @@ $languageStrings = array(
 	'LBL_PROFILE_VIEW'             => 'Profile view'                , // TODO: Review
 	'LBL_FIELDS'                   => 'Fields'                      , // TODO: Review
 	'LBL_TOOLS'                    => 'Tools'                       , // TODO: Review
-	'LBL_FIELD_AND_TOOL_PRVILIGES' => 'Field and Tool Privileges'   , // TODO: Review
+	'LBL_FIELD_AND_TOOL_PRIVILEGES' => 'Privilegios de campo y de herramientas'   , // TODO: Review
 	'LBL_EDIT_RECORD'              => 'Edit'                        , // TODO: Review
 	'LBL_DUPLICATE_RECORD'         => 'Duplicate'                   , // TODO: Review
 	'LBL_DELETE_RECORD'            => 'Delete'                      , // TODO: Review
@@ -33,6 +33,16 @@ $languageStrings = array(
 	'LBL_TRANSFER_ROLES_TO_PROFILE' => 'Transfer roles to profile'   , // TODO: Review
 	'LBL_PROFILES'                 => 'Profiles'                    , // TODO: Review
 	'LBL_CHOOSE_PROFILES'          => 'Choose Profiles'             , // TODO: Review
+	'LBL_GLOBAL_PERMISSION_WARNING' => 'Advertencia: Los usuarios asociados a este perfil puede acceder a todos los registros de la CRM',
+
+  'LBL_EDIT_PRIVILEGES_OF_THIS_PROFILE' => 'Editar los privilegios de este perfil',
+  'LBL_VIEW_ALL' => 'Ver Todos',
+  'LBL_EDIT_ALL' => 'Editar Todos Los',
+  'LBL_VIEW_ALL_DESC' => 'Puede ver todos los módulos de información',
+  'LBL_EDIT_ALL_DESC' => 'Puede editar todos los módulos de información',
+  'LBL_DUPLICATES_EXIST' => 'Perfil Duplicado Existe',
+  'LBL_EDIT_PROFILE' => 'Editar Perfil',
+
 );
 $jsLanguageStrings = array(
 	'JS_RECORD_DELETED_SUCCESSFULLY' => 'Profile deleted successfully', // TODO: Review

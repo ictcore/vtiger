@@ -10,6 +10,9 @@
  ********************************************************************************/
 -->*}
 {strip}
+{if $MODULE_NAME eq 'Webforms'}
+	<input type="text" readonly="" />
+{else}
 {assign var="FIELD_INFO" value=Vtiger_Util_Helper::toSafeHTML(Zend_Json::encode($FIELD_MODEL->getFieldInfo()))}
 {assign var="SPECIAL_VALIDATOR" value=$FIELD_MODEL->getValidator()}
 	<input type="file" class="input-large {if $MODULE eq 'Products'}multi" maxlength="6"{else}"{/if} name="{$FIELD_MODEL->getFieldName()}[]" value="{$FIELD_MODEL->get('fieldvalue')}"
@@ -23,9 +26,10 @@
 				<span class="span8" name="existingImages"><img src="{$IMAGE_INFO.path}_{$IMAGE_INFO.orgname}" data-image-id="{$IMAGE_INFO.id}"></span>
 				<span class="span3 row-fluid">
 					<span class="row-fluid">[{$IMAGE_INFO.name}]</span>
-					<span class="row-fluid"><input type="button" id="file_{$ITER}" value="Delete" class="imageDelete"></span>
+					<span class="row-fluid"><input type="button" id="file_{$ITER}" value={vtranslate("LBL_DELETE")} class="imageDelete"></span>
 				</span>
 			{/if}
 		</div>
 	{/foreach}
+{/if}
 {/strip}

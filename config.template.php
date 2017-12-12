@@ -14,15 +14,16 @@
 ********************************************************************************/
 
 // Adjust error_reporting favourable to deployment.
-error_reporting(E_WARNING & ~E_NOTICE & ~E_DEPRECATED); // PRODUCTION
-//ini_set('display_errors','on'); error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);   // DEBUGGING
+version_compare(PHP_VERSION, '5.5.0') <= 0 ? error_reporting(E_WARNING & ~E_NOTICE & ~E_DEPRECATED & E_ERROR) : error_reporting(E_WARNING & ~E_NOTICE & ~E_DEPRECATED  & E_ERROR & ~E_STRICT); // PRODUCTION
+//ini_set('display_errors','on'); version_compare(PHP_VERSION, '5.5.0') <= 0 ? error_reporting(E_WARNING & ~E_NOTICE & ~E_DEPRECATED) : error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT);   // DEBUGGING
+//ini_set('display_errors','on'); error_reporting(E_ALL); // STRICT DEVELOPMENT
 
 
 include('vtigerversion.php');
 
 // more than 8MB memory needed for graphics
 // memory limit default value = 64M
-//ini_set('memory_limit','64M');
+ini_set('memory_limit','512M');
 
 // show or hide calendar, world clock, calculator, chat and CKEditor 
 // Do NOT remove the quotes if you set these to false! 
@@ -31,9 +32,6 @@ $WORLD_CLOCK_DISPLAY = 'true';
 $CALCULATOR_DISPLAY = 'true';
 $CHAT_DISPLAY = 'true'; 
 $USE_RTE = 'true';
-
-// url for customer portal (Example: http://vtiger.com/portal)
-$PORTAL_URL = 'http://vtiger.com/customerportal';
 
 // helpdesk support email id and support name (Example: 'support@vtiger.com' and 'vtiger support')
 $HELPDESK_SUPPORT_EMAIL_ID = '_USER_SUPPORT_EMAIL_';
@@ -86,6 +84,8 @@ $host_name = $dbconfig['db_hostname'];
 
 $site_URL = '_SITE_URL_';
 
+// url for customer portal (Example: http://vtiger.com/portal)
+$PORTAL_URL = $site_URL.'/customerportal';
 // root directory path
 $root_directory = '_VT_ROOTDIR_';
 
@@ -103,7 +103,7 @@ $upload_dir = '_VT_UPLOADDIR_';
 
 // maximum file size for uploaded files in bytes also used when uploading import files
 // upload_maxsize default value = 3000000
-$upload_maxsize = 3000000;
+$upload_maxsize = 3145728;//3MB
 
 // flag to allow export functionality
 // 'all' to allow anyone to use exports 
@@ -170,7 +170,7 @@ $default_charset = '_VT_CHARSET_';
 
 // default language
 // default_language default value = en_us
-$default_language = 'en_us';
+$default_language = '_VT_DEFAULT_LANGUAGE_';
 
 // add the language pack name to every translation string in the display.
 // translation_string_prefix default value = false
@@ -201,4 +201,9 @@ $default_timezone = 'UTC';
 if(isset($default_timezone) && function_exists('date_default_timezone_set')) {
 	@date_default_timezone_set($default_timezone);
 }
+
+//Set the default layout 
+$default_layout = 'v7';
+
+include_once 'config.security.php';
 ?>

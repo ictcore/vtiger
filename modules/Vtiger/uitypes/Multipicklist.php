@@ -24,7 +24,14 @@ class Vtiger_Multipicklist_UIType extends Vtiger_Base_UIType {
 	 * @return <Object>
 	 */
 	public function getDisplayValue($value) {
-        if(is_array($value)){
+
+		$moduleName = $this->get('field')->getModuleName();
+		$value = explode(' |##| ', $value);
+		foreach ($value as $key => $val) {
+			$value[$key] = vtranslate($val, $moduleName);
+		}
+
+		if(is_array($value)){
             $value = implode(' |##| ', $value);
         }
 		return str_ireplace(' |##| ', ', ', $value);
@@ -36,4 +43,9 @@ class Vtiger_Multipicklist_UIType extends Vtiger_Base_UIType {
         }
         return $value;
 	}
+    
+    
+    public function getListSearchTemplateName() {
+        return 'uitypes/MultiSelectFieldSearchView.tpl';
+    }
 }

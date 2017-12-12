@@ -25,32 +25,36 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 		$queryGenerator = $this->get('query_generator');
 		$listViewContoller = $this->get('listview_controller');
 
+         $searchParams = $this->get('search_params');
+        if(empty($searchParams)) {
+            $searchParams = array();
+        }
+        
+        $glue = "";
+        if(count($queryGenerator->getWhereFields()) > 0 && (count($searchParams)) > 0) {
+            $glue = QueryGenerator::$AND;
+        }
+        $queryGenerator->parseAdvFilterList($searchParams, $glue);
+        
 		$searchKey = $this->get('search_key');
 		$searchValue = $this->get('search_value');
 		$operator = $this->get('operator');
 		if(!empty($searchKey)) {
 			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
 		}
-        $orderBy = $this->getForSql('orderby');
-		$sortOrder = $this->getForSql('sortorder');
-
-		//List view will be displayed on recently created/modified records
-		if(empty($orderBy) && empty($sortOrder) && $moduleName != "Users"){
-			$orderBy = 'modifiedtime';
-			$sortOrder = 'DESC';
-		}
-
+        
+        $orderBy = $this->get('orderby');
+		$sortOrder = $this->get('sortorder');
+		
         if(!empty($orderBy)){
-            $columnFieldMapping = $moduleModel->getColumnFieldMapping();
-            $orderByFieldName = $columnFieldMapping[$orderBy];
-            $orderByFieldModel = $moduleModel->getField($orderByFieldName);
-            if($orderByFieldModel && $orderByFieldModel->getFieldDataType() == Vtiger_Field_Model::REFERENCE_TYPE){
-                //IF it is reference add it in the where fields so that from clause will be having join of the table
-                $queryGenerator = $this->get('query_generator');
-                $queryGenerator->addWhereField($orderByFieldName);
+			$queryGenerator = $this->get('query_generator');
+			$fieldModels = $queryGenerator->getModuleFields();
+			$orderByFieldModel = $fieldModels[$orderBy];
+			if($orderByFieldModel && ($orderByFieldModel->getFieldDataType() == Vtiger_Field_Model::REFERENCE_TYPE ||
+					$orderByFieldModel->getFieldDataType() == Vtiger_Field_Model::OWNER_TYPE)){
+                $queryGenerator->addWhereField($orderBy);
             }
         }
-
 		$listQuery = $this->getQuery();
 
 		if($this->get('subProductsPopup')){
@@ -71,46 +75,32 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 		$startIndex = $pagingModel->getStartIndex();
 		$pageLimit = $pagingModel->getPageLimit();
 
-		if(!empty($orderBy)) {
-            if($orderByFieldModel && $orderByFieldModel->getFieldDataType() == Vtiger_Field_Model::REFERENCE_TYPE){
-                $referenceModules = $orderByFieldModel->getReferenceList();
-                $referenceNameFieldOrderBy = array();
-                foreach($referenceModules as $referenceModuleName) {
-                    $referenceModuleModel = Vtiger_Module_Model::getInstance($referenceModuleName);
-                    $referenceNameFields = $referenceModuleModel->getNameFields();
-
-                    $columnList = array();
-                    foreach($referenceNameFields as $nameField) {
-                        $fieldModel = $referenceModuleModel->getField($nameField);
-                        $columnList[] = $fieldModel->get('table').$orderByFieldModel->getName().'.'.$fieldModel->get('column');
-                    }
-                    if(count($columnList) > 1) {
-                        $referenceNameFieldOrderBy[] = getSqlForNameInDisplayFormat(array('first_name'=>$columnList[0],'last_name'=>$columnList[1]),'Users').' '.$sortOrder;
-                    } else {
-                        $referenceNameFieldOrderBy[] = implode('', $columnList).' '.$sortOrder ;
-                    }
-                }
-                $listQuery .= ' ORDER BY '. implode(',',$referenceNameFieldOrderBy);
-            }else{
-                $listQuery .= ' ORDER BY '. $orderBy . ' ' .$sortOrder;
-            }
+		if(!empty($orderBy) && $orderByFieldModel) {
+			$listQuery .= ' ORDER BY '.$queryGenerator->getOrderByColumn($orderBy).' '.$sortOrder;
+		} else if(empty($orderBy) && empty($sortOrder)){
+			//List view will be displayed on recently created/modified records
+			$listQuery .= ' ORDER BY vtiger_crmentity.modifiedtime DESC';
 		}
 
 		$viewid = ListViewSession::getCurrentView($moduleName);
+        if(empty($viewid)){
+            $viewid = $pagingModel->get('viewid');
+        }
+        $_SESSION['lvs'][$moduleName][$viewid]['start'] = $pagingModel->get('page');
 		ListViewSession::setSessionQuery($moduleName, $listQuery, $viewid);
 
 		//For Products popup in Price Book Related list
-		if($sourceModule !== 'PriceBooks' && $sourceField !== 'priceBookRelatedList') {
+		if(($sourceModule !== 'PriceBooks' && $sourceField !== 'priceBookRelatedList')
+				&& ($sourceModule !== 'Products' && $sourceField !== 'productsList')) {
 			$listQuery .= " LIMIT $startIndex,".($pageLimit+1);
 		}
 
 		$listResult = $db->pquery($listQuery, array());
-
 		$listViewRecordModels = array();
 		$listViewEntries =  $listViewContoller->getListViewRecords($moduleFocus,$moduleName, $listResult);
 		$pagingModel->calculatePageRange($listViewEntries);
-
-		if($db->num_rows($listResult) > $pageLimit && $sourceModule !== 'PriceBooks' && $sourceField !== 'priceBookRelatedList'){
+        
+		if($db->num_rows($listResult) > $pageLimit){
 			array_pop($listViewEntries);
 			$pagingModel->set('nextPageExists', true);
 		}else{
@@ -127,12 +117,12 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 	}
 
 	public function addSubProductsQuery($listQuery){
-		$splitQuery = split('WHERE', $listQuery);
-		$query = " LEFT JOIN vtiger_seproductsrel ON vtiger_seproductsrel.crmid = vtiger_products.productid AND vtiger_seproductsrel.setype='Products'";
-		$splitQuery[0] .= $query;
 		$productId = $this->get('productId');
-		$query1 = " AND vtiger_seproductsrel.productid = $productId";
-		$splitQuery[1] .= $query1;
+
+		$splitQuery = split('WHERE', $listQuery);
+		$splitQuery[0] .= " LEFT JOIN vtiger_seproductsrel ON vtiger_seproductsrel.crmid = vtiger_products.productid AND vtiger_seproductsrel.setype='Products'";
+		$splitQuery[1] .= " AND vtiger_seproductsrel.productid = $productId AND vtiger_products.discontinued = 1";
+
 		$listQuery = $splitQuery[0]. ' WHERE ' . $splitQuery[1];
 		return $listQuery;
 	}
@@ -140,8 +130,13 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 	public function getSubProducts($subProductId){
 		$flag = false;
 		if(!empty($subProductId)){
-			$db = PearDatabase::getInstance();
-			$result = $db->pquery('SELECT crmid FROM vtiger_seproductsrel WHERE productid = ?', array($subProductId));
+            $db = PearDatabase::getInstance();
+			$query = 'SELECT vtiger_seproductsrel.crmid from vtiger_seproductsrel
+						INNER JOIN vtiger_products ON vtiger_products.productid = vtiger_seproductsrel.crmid
+						INNER JOIN vtiger_crmentity ON vtiger_seproductsrel.crmid = vtiger_crmentity.crmid
+						AND vtiger_crmentity.deleted = 0 AND vtiger_seproductsrel.setype=?
+						WHERE vtiger_seproductsrel.productid=? AND vtiger_products.discontinued = 1';
+			$result = $db->pquery($query, array($this->getModule()->get('name'), $subProductId ));
 			if($db->num_rows($result) > 0){
 				$flag = true;
 			}
@@ -159,12 +154,25 @@ class Products_ListView_Model extends Vtiger_ListView_Model {
 
 		$queryGenerator = $this->get('query_generator');
 
+        $searchParams = $this->get('search_params');
+        if(empty($searchParams)) {
+            $searchParams = array();
+        }
+        
+        $glue = "";
+        if(count($queryGenerator->getWhereFields()) > 0 && (count($searchParams)) > 0) {
+            $glue = QueryGenerator::$AND;
+        }
+        $queryGenerator->parseAdvFilterList($searchParams, $glue);
+        
         $searchKey = $this->get('search_key');
 		$searchValue = $this->get('search_value');
 		$operator = $this->get('operator');
 		if(!empty($searchKey)) {
 			$queryGenerator->addUserSearchConditions(array('search_field' => $searchKey, 'search_text' => $searchValue, 'operator' => $operator));
 		}
+        
+        
 
 		$listQuery = $this->getQuery();
 

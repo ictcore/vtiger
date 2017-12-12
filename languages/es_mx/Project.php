@@ -8,6 +8,7 @@
  * All Rights Reserved.
  ************************************************************************************/
 $languageStrings = array(
+    'Project'                      => 'Proyecto'                    , 
 	'SINGLE_Project'               => 'Proyecto'                    , 
 	'LBL_ADD_RECORD'               => 'Agregar Proyecto'            , 
 	'LBL_RECORDS_LIST'             => 'Lista de proyectos'          , 
@@ -19,7 +20,9 @@ $languageStrings = array(
 	'Project No'                   => 'Nº Proyecto'                , 
 	'Target Budget'                => 'Presupuesto Inicial'         , 
 	'Project Url'                  => 'URL Proyecto'                , 
-	'Progress'                     => 'Progreso'                    , 
+	'Progress'                     => 'Progreso'                    ,
+        'Type'                         => 'Tipo'                        , 
+    'Related to'                   => 'En relación con'             ,
 	'LBL_TASKS_OPEN'               => 'Actividades abiertas'        , 
 	'LBL_TASKS_DUE'                => 'Actividades retrasadas'      , 
 	'LBL_TASKS_COMPLETED'          => 'Actividades completadas'     , 
@@ -31,6 +34,47 @@ $languageStrings = array(
 	'LBL_STATUS_IS'                => 'Status is'                   , // TODO: Review
 	'LBL_STATUS'                   => 'Status'                      , // TODO: Review
 	'LBL_TICKET_PRIORITY'          => 'Priority'                    , // TODO: Review
-	'LBL_MORE'                     => 'more'                        , // TODO: Review
 	'LBL_DOWNLOAD_FILE'            => 'Download File'               , // TODO: Review
+    'LBL_MILESTONES_LIST'          => 'Lista de Hitos'              ,
+    'LBL_TASKS_HIGH'               => 'Alta Prioridad'              ,
+    'LBL_TASKS_NORMAL'             => 'Prioridad Normal'            ,
+    'LBL_TASKS_LOW'                => 'Prioridad baja'              ,
+    'LBL_TASKS_OTHER'              => 'Otras prioridades'           ,
+    'LBL_SELECT_PROGRESS'			=> 'Progress - Todos',
+	'LBL_SELECT_STATUS'				=> 'estado - todo',
+	
+	//picklist values
+	'prospecting' => 'Prospección',
+    'in progress' => 'En curso',
+    'initiated' => 'Iniciado',
+	'waiting for feedback' => 'Esperando Feedback',
+    'on hold' => 'En espera',
+    'archived' => 'Archivado',
+    'completed' => 'Terminado',
+    'delivered' => 'Liberado',
+	'administrative' => 'Administrativo',
+    'operative' => 'Operatorio',
+    'other' => 'Otro',
+    'low' => 'Bajo',
+    'normal' => 'Normal',
+    'high' => 'Alto',
+    
+    //Gantt chart 
+    'LBL_CHART' => 'Diagrama de Gantt',
+    'LBL_PROGRESS_CHART' => 'Diagrama de Gantt',
+    'LBL_TASK_NAME' => 'nombre de la tarea',
+    'LBL_START_DATE' => 'fecha de inicio',
+    'LBL_END_DATE' => 'fecha de finalización',
+    'LBL_DURATION' => 'duración',
+    'LBL_INFO' => 'Info',
+    'LBL_GANTT_INFO1' => 'Deslice el lado derecho de la tarea de ampliar la duración',
+    'LBL_GANTT_INFO2' => 'Arrastrar a la izquierda o en el centro de la tarea de cambiar de inicio y fecha de finalización.',
+    'LBL_EDIT_PROJECT_TASK_STATUS_COLOR' => 'Estado Editar tarea Proyecto color',
+    'LBL_SELECT_PROJECT_TASK_STATUS_COLOR' => 'Seleccione Estado del Proyecto Tarea color',
+    'LBL_SELECT_STATUS' => 'Seleccione Estado',
+    'LBL_EDIT_COLOR' => 'Editar color',
+);
+
+$jsLanguageStrings = array(
+   'JS_COLOR_SAVED_SUCESSFULLY' => 'Color Saved Successfully',
 );
